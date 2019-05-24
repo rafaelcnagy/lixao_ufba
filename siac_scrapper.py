@@ -26,8 +26,8 @@ class Scrapper:
 
 	def scrap(self):
 		url = self.base_url + '/SiacWWW/ConsultarComponentesCurricularesCursados.do'
-		#response = self.session.get(url)
-		response = self.try_request(url)
+		response = self.session.get(url)
+		#response = self.try_request(url)
 		selector = Selector(response.text)
 
 		self.cr = selector.xpath("//td[b[text()='CR:']]/text()").extract_first()
@@ -56,7 +56,7 @@ class Scrapper:
 
 	def create_json(self):
 		with open('/%s.json' % self.matricula, 'w') as json_file:
-		json.dumps({'curso': self.curso, 
+			json.dumps({'curso': self.curso, 
 					'curriculo':self.curriculo, 
 					'matricula': self.matricula, 
 					'cr': self.cr, 
@@ -80,17 +80,18 @@ class Scrapper:
 			print(item)
 		print('\nAcessado em {}'.format(self.data_acesso.strftime(format='%d/%m/%Y %H:%M:%S')))
 
-		def try_request(url, timeout=10, retry=3, headers=None, data=None):
-			if not headers:
-				headers = {	'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:54.0) Gecko/20100101 Firefox/54.0',
-							'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-							'Accept-Encoding':	'gzip, deflate, br',
-							'Accept-Language':	'en-US,en;q=0.5'}
-			for i in range(retry):
-				response = self.session.get(url=url, headers=headers, data=data, timeout=timeout)
-				if int(response.status_code/100) == 1:
-					return response
-				else:
-					sleep(60)
-			print("Erro no request!")
-			return None
+	def try_request(self, url, timeout=10, retry=3, headers=None, data=None):
+		if not headers:
+			headers = {	'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:54.0) Gecko/20100101 Firefox/54.0',
+						'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+						'Accept-Encoding':	'gzip, deflate, br',
+						'Accept-Language':	'en-US,en;q=0.5'}
+		for i in range(retry):
+			response = self.session.get(url=url, headers=headers, data=data, timeout=timeout)
+			if int(response.status_code/100) == 1:
+				return response
+			else:
+				print('Erro no request')
+				sleep(60)
+		print("Erro no request!")
+		return None
