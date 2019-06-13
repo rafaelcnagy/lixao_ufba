@@ -89,6 +89,9 @@ Rails.application.configure do
     config.logger    = ActiveSupport::TaggedLogging.new(logger)
   end
 
+  # Devise config, trocar host pelo atual host da aplicação
+   config.action_mailer.default_url_options = { host: 'localhost', port: 3000 }
+
   # Do not dump schema after migrations.
   config.active_record.dump_schema_after_migration = false
 end
