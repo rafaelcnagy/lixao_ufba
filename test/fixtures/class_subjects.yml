@@ -1,0 +1,11 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  number: MyString
+  hour_begin: MyString
+  hour_ends: MyString
+
+two:
+  number: MyString
+  hour_begin: MyString
+  hour_ends: MyString
