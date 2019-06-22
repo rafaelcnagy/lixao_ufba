@@ -14,6 +14,7 @@ ActiveRecord::Schema.define(version: 2019_06_22_051432) do
 
   create_table "class_subjects", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
     t.string "number"
+    t.string "days"
     t.string "hour_begins"
     t.string "hour_ends"
     t.bigint "subject_id"
