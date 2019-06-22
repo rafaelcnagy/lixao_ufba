@@ -2,10 +2,10 @@
 
 one:
   name: MyString
-  cpf: 1
-  registry: 1
+  code: MyString
+  about: MyText
 
 two:
   name: MyString
-  cpf: 1
-  registry: 1
+  code: MyString
+  about: MyText
