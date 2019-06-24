@@ -4,12 +4,12 @@ import datetime
 from time import sleep
 import json
 import os
-
+import sys
 
 class Scrapper:
 	base_url = 'https://siac.ufba.br'
 
-	def __init__(self, cpf, senha, json_path='/home/nagy/siac'):
+	def __init__(self, cpf, senha, json_path='/home/deploy/siac_data'):
 		self.cpf = cpf
 		self.senha = senha
 		self.session = requests.Session()
@@ -17,21 +17,23 @@ class Scrapper:
 		self.materias_aprovadas = []
 		self.materias_cursando = []
 
-	def login(self):
+	def login(self, retries=3):
 		url = self.base_url + '/SiacWWW/LogonSubmit.do'
 		data = {'cpf': self.cpf,
 				'senha': self.senha}
 		response = self.try_request(method='POST', url=url, data=data)
+		response.raise_for_status()
 		selector = Selector(response.text)
 		if selector.xpath("//td[@class='menu']/a[text()='Página Inicial']"):
 			return True
 		return False
 
-	def scrap(self):
+	def scrap(self, retries=3):
 		# Dados e matérias aprovadas
 
 		url = self.base_url + '/SiacWWW/ConsultarComponentesCurricularesCursados.do'
 		response = self.try_request(method='GET', url=url)
+		response.raise_for_status()
 		selector = Selector(response.text)
 
 		self.cr = selector.xpath("//td[b[text()='CR:']]/text()").extract_first().strip()
@@ -43,6 +45,7 @@ class Scrapper:
 		tabela = selector.xpath("//table[@class='corpoHistorico' and tr/th[text()='Componentes Curriculares']]")
 
 		if not tabela:
+			raise Exception('Tabela1 não encontrada')
 			return False
 
 		for item in tabela.xpath("./tr[td[text()='AP' or text()='DU' or text()='DI']]"):
@@ -60,9 +63,10 @@ class Scrapper:
 		tabela = selector.xpath("//table[@class='simple2'][1]")
 
 		if not tabela:
+			raise Exception('Tabela2 não encontrada')
 			return False
 
-		for item in tabela.xpath(".//tr[@class='odd']"):
+		for item in tabela.xpath(".//tr[td[1][b]]"):
 			materia = item.xpath("./td/b/text()").extract()
 			self.materias_cursando.append({'codigo': materia[0].strip(), 'nome': materia[1].strip(), 'turma': materia[3].strip()})
 
@@ -71,7 +75,7 @@ class Scrapper:
 	def create_json(self):
 		if not os.path.exists(self.json_path):
 			os.makedirs(self.json_path)
-		with open(self.json_path + '/%s.json' % self.matricula, mode='w', encoding='utf_8') as json_file:
+		with open(self.json_path + f'/{self.matricula}.json', mode='w', encoding='utf_8') as json_file:
 			json.dump({'curso': self.curso,
 						'curriculo': self.curriculo,
 						'matricula': self.matricula,
@@ -113,3 +117,10 @@ class Scrapper:
 				sleep(60)
 		print("Erro no request!")
 		return None
+
+matricula = sys.argv[1]
+senha = sys.argv[2]
+aluno = Scrapper(matricula, senha)
+aluno.login()
+aluno.scrap()
+aluno.create_json()
