@@ -1,12 +1,19 @@
 class StudentController < ApplicationController
-  skip_before_action :verify_authenticity_token  
+  skip_before_action :verify_authenticity_token
+
   def create
     cpf = params[:cpf]
     password = params[:password]
 
-    exec("python3 siac_scrapper.py '#{cpf}' '#{password}'")
-    json = JSON.parse(File.read("/home/vinicius/Documentos/rubyProj/#{cpf}.json"))
+    system("python3 siac_scrapper.py '#{cpf}' '#{password}'")
+    file = File.read("/home/vinicius/Documentos/rubyProj/#{cpf}.json")
+    json = JSON.parse(file)
 
-    puts json
+    redirect_to "/student", json: json['matricula']
   end
+
+  def index
+    @son = params[:json].class
+  end
+
 end
