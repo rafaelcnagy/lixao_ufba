@@ -16,6 +16,7 @@ class Scrapper:
 		self.json_path = json_path
 		self.materias_aprovadas = []
 		self.materias_cursando = []
+		self.status = True
 
 	def login(self, retries=3):
 		url = self.base_url + '/SiacWWW/LogonSubmit.do'
@@ -25,12 +26,14 @@ class Scrapper:
 		response.raise_for_status()
 		selector = Selector(response.text)
 		if selector.xpath("//td[@class='menu']/a[text()='Página Inicial']"):
-			return True
-		return False
+			self.status = True
+		else:
+			self.status = False
 
 	def scrap(self, retries=3):
 		# Dados e matérias aprovadas
-
+		if not self.status:
+			return
 		url = self.base_url + '/SiacWWW/ConsultarComponentesCurricularesCursados.do'
 		response = self.try_request(method='GET', url=url)
 		response.raise_for_status()
@@ -46,7 +49,8 @@ class Scrapper:
 
 		if not tabela:
 			raise Exception('Tabela1 não encontrada')
-			return False
+			self.status = False
+			return
 
 		for item in tabela.xpath("./tr[td[text()='AP' or text()='DU' or text()='DI']]"):
 			materia = item.xpath("./td/text()").extract()
@@ -64,28 +68,37 @@ class Scrapper:
 
 		if not tabela:
 			raise Exception('Tabela2 não encontrada')
-			return False
+			self.status = False
+			return
 
 		for item in tabela.xpath(".//tr[td[1][b]]"):
 			materia = item.xpath("./td/b/text()").extract()
 			self.materias_cursando.append({'codigo': materia[0].strip(), 'nome': materia[1].strip(), 'turma': materia[3].strip()})
 
-		return True
+		self.status = True
 
-	def create_json(self):
+	def create_json(self):	
 		if not os.path.exists(self.json_path):
 			os.makedirs(self.json_path)
-		with open(self.json_path + f'/{self.matricula}.json', mode='w', encoding='utf_8') as json_file:
-			json.dump({'curso': self.curso,
-						'curriculo': self.curriculo,
-						'matricula': self.matricula,
-						'cr': self.cr,
-						'materias_aprovadas': self.materias_aprovadas,
-						'materias_cursando': self.materias_cursando,
-						'data_acesso': self.data_acesso.strftime(format='%d/%m/%Y %H:%M:%S')},
-					   json_file, ensure_ascii=False, indent=4)
+		with open(self.json_path + f'/{self.cpf}.json', mode='w', encoding='utf_8') as json_file:
+			if self.status:
+				json.dump({'curso': self.curso,
+						   'curriculo': self.curriculo,
+						   'matricula': self.matricula,
+						   'cr': self.cr,
+						   'materias_aprovadas': self.materias_aprovadas,
+						   'materias_cursando': self.materias_cursando,
+						   'data_acesso': self.data_acesso.strftime(format='%d/%m/%Y %H:%M:%S')},
+						   json_file, ensure_ascii=False, indent=4)
+			else: 
+				json.dump({'ERRO': 'não foi possivel carregar informações',
+						   'data_acesso': datetime.datetime.now().strftime(format='%d/%m/%Y %H:%M:%S')},
+						   json_file, ensure_ascii=False, indent=4)
 
 	def show(self):
+		if not self.status:
+			print('ERRO: Aluno não tem dados!')
+			return
 		print('CURSO: {}'.format(self.curso))
 		print('CURRÍCULO: {}'.format(self.curriculo))
 		print('MATRICULA: {}'.format(self.matricula))
@@ -118,9 +131,9 @@ class Scrapper:
 		print("Erro no request!")
 		return None
 
-matricula = sys.argv[1]
+cpf = sys.argv[1]
 senha = sys.argv[2]
-aluno = Scrapper(matricula, senha)
+aluno = Scrapper(cpf, senha)
 aluno.login()
 aluno.scrap()
 aluno.create_json()
