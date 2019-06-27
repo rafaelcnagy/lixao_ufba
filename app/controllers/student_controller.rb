@@ -6,14 +6,16 @@ class StudentController < ApplicationController
     password = params[:password]
 
     system("python3 siac_scrapper.py '#{cpf}' '#{password}'")
-    file = File.read("/home/vinicius/Documentos/rubyProj/#{cpf}.json")
-    json = JSON.parse(file)
+    file = File.read("/home/deploy/siac_data/#{cpf}.json")
+    @json = JSON.parse(file)
 
-    redirect_to "/student", json: json['matricula']
+    student = Student.first_or_create(cpf: cpf, registry: @json['matricula'], name: @json['nome'])
+
+    render :index
   end
 
   def index
-    @son = params[:json].class
+    @sub = Subject.where.not(code: @json['materias_aprovadas']['codigo'])
   end
 
 end
