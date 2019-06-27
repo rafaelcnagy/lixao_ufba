@@ -1,6 +1,25 @@
-<tr>
-	<% for f in @classes_remain do %>
-	<td><%= f.number %></td>
-	<% end %>
-</tr>
-
+ <div class="row">
+  <div class="col-sm-4">
+    <h1>Disciplinas Cursadas</h1>
+    <% for f in @subjects_done do %>
+      <h3><%= f.name %> <%= f.code %></h3>
+      <p><%= f.about %></p>
+    <% end %>
+  </div>
+  <div class="col-sm-4">
+    <h1>Disciplinas Atuais</h1>
+    <% for f in @classes_current do %>
+      <h3><%= f.number %> <%= f.days %></h3>
+      <p><%= f.subject.name %></p>
+      <p><%= f.hour_begins %> às <%= f.hour_ends %></p>
+    <% end %>
+  </div>
+  <div class="col-sm-4">
+    <h1>Disciplinas Disponíveis</h1>
+    <% for f in @classes_remain do %>
+      <h3><%= f.number %> <%= f.days %></h3>
+      <p><%= f.subject.name %></p>
+      <p><%= f.hour_begins %> às <%= f.hour_ends %></p>
+    <% end %>
+  </div>
+</div> 
