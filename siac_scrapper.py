@@ -39,6 +39,7 @@ class Scrapper:
 		response.raise_for_status()
 		selector = Selector(response.text)
 
+		self.nome = selector.xpath("//td[b[text()='NOME:']]/text()").extract_first().strip().title()
 		self.cr = selector.xpath("//td[b[text()='CR:']]/text()").extract_first().strip()
 		self.matricula = selector.xpath("//td[b[text()='MATRÍCULA:']]/text()").extract_first().strip()
 		self.curso = selector.xpath("//td[b[text()='CURSO:']]/text()").extract_first().strip()
@@ -85,6 +86,7 @@ class Scrapper:
 				json.dump({'curso': self.curso,
 						   'curriculo': self.curriculo,
 						   'matricula': self.matricula,
+						   'nome': self.nome,
 						   'cr': self.cr,
 						   'materias_aprovadas': self.materias_aprovadas,
 						   'materias_cursando': self.materias_cursando,
@@ -99,6 +101,7 @@ class Scrapper:
 		if not self.status:
 			print('ERRO: Aluno não tem dados!')
 			return
+		print('NOME: {}'.format(self.nome))
 		print('CURSO: {}'.format(self.curso))
 		print('CURRÍCULO: {}'.format(self.curriculo))
 		print('MATRICULA: {}'.format(self.matricula))
