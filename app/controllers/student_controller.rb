@@ -6,20 +6,23 @@ class StudentController < ApplicationController
     password = params[:password]
 
     system("python3 siac_scrapper.py '#{cpf}' '#{password}'")
-    file = File.read("/home/deply/data_siac/#{cpf}.json")
+    file = File.read("/home/deploy/siac_data/#{cpf}.json")
     @json = JSON.parse(file)
 
     if @json.key?('ERRO')
       redirect_to root_path
     else    
-      student = Student.first_or_create(cpf: cpf, registry: @json['matricula'], name: @json['nome'])
+      @student = Student.find_or_create_by(cpf: cpf, registry: @json['matricula'], name: @json['nome'])
 
       aux = []
+      aux2 = []
       for x in @json['materias_cursando'] do
         aux.push x['turma']
+        q = Subject.where(code: x['codigo']).ids
+        aux2= aux2+q 
       end
       # Turmas que esta matriculado
-      @classes_current = ClassSubject.where(number: aux)
+      @classes_current = ClassSubject.where(number: aux, subject_id: aux2)
 
       aux = []
       for x in @json['materias_aprovadas'] do

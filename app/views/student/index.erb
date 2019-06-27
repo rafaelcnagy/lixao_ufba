@@ -1,25 +1,42 @@
- <div class="row">
+<div class="row">
+  <div class="col-sm-12">
+    <h1>Olá <%= @student.name %></h1>
+  </div>
+</div>
+<div class="row">
   <div class="col-sm-4">
+    <div class="box">
     <h1>Disciplinas Cursadas</h1>
     <% for f in @subjects_done do %>
-      <h3><%= f.name %> <%= f.code %></h3>
-      <p><%= f.about %></p>
+      <div class="minibox">
+        <h3><%= f.name %> <%= f.code %></h3>
+        <p><%= f.about %></p>
+      </div>
     <% end %>
   </div>
+  </div>
   <div class="col-sm-4">
+    <div class="box">
     <h1>Disciplinas Atuais</h1>
     <% for f in @classes_current do %>
+    <div class="minibox">
       <h3><%= f.number %> <%= f.days %></h3>
       <p><%= f.subject.name %></p>
       <p><%= f.hour_begins %> às <%= f.hour_ends %></p>
+    </div>
     <% end %>
   </div>
+  </div>
   <div class="col-sm-4">
+    <div class="box">
     <h1>Disciplinas Disponíveis</h1>
     <% for f in @classes_remain do %>
+      <div class="minibox">
       <h3><%= f.number %> <%= f.days %></h3>
       <p><%= f.subject.name %></p>
       <p><%= f.hour_begins %> às <%= f.hour_ends %></p>
+      </div>
     <% end %>
+  </div>
   </div>
 </div> 
