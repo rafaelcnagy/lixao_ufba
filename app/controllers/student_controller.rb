@@ -6,11 +6,10 @@ class StudentController < ApplicationController
     password = params[:password]
 
     system("python3 siac_scrapper.py '#{cpf}' '#{password}'")
-    file = File.read("/home/deploy/siac_data/#{cpf}.json")
+    file = File.read("/home/deply/data_siac/#{cpf}.json")
     @json = JSON.parse(file)
 
-    if @json.key?('ERRO') 
-      puts "volta"
+    if @json.key?('ERRO')
       redirect_to root_path
     else    
       student = Student.first_or_create(cpf: cpf, registry: @json['matricula'], name: @json['nome'])
@@ -28,6 +27,8 @@ class StudentController < ApplicationController
       end
       # Disciplinas que não foi aprovado (incluindo as matérias que ele está matriculado)
       @subjects_remain = Subject.where.not(code: aux)
+
+      @subjects_done = Subject.where(code: aux)
 
       aux = []
       for x in @subjects_remain do
