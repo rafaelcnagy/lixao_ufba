@@ -6,7 +6,7 @@ class StudentController < ApplicationController
     password = params[:password]
 
     system("python3 siac_scrapper.py '#{cpf}' '#{password}'")
-    file = File.read("/home/deply/data_siac/#{cpf}.json")
+    file = File.read("/home/deploy/siac_data/#{cpf}.json")
     @json = JSON.parse(file)
 
     if @json.key?('ERRO')
